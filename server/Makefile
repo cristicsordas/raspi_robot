@@ -1,15 +1,62 @@
-SRC ?= aesdsocket.c
-TARGET ?= aesdsocket
-OBJS := $(SRC:.c=.o)
-CROSS_COMPILE:=
-CC ?= $(CROSS_COMPILE)gcc
-CFLAGS?= -g -Wall
-LDFLAGS?=-pthread -lrt
+#Pre-compiler and Compiler flags
+CXX_FLAGS ?= -Wall -Wextra -std=c++17 -ggdb
+PRE_FLAGS ?= -MMD -MP
 
+# Project directory structure
+BIN ?= bin
+SRC ?= src
+LIB ?= lib
+INC ?= include
+MAINFILE ?= $(SRC)/aesdsocket.cpp
+
+# Build directories and output
+TARGET ?= $(BIN)/aesdsocket
+BUILD ?= build
+
+# Library search directories and flags
+EXT_LIB ?=
+LDFLAGS ?=-pthread -lrt
+LDPATHS ?= $(addprefix -L,$(LIB) $(EXT_LIB))
+
+# Include directories
+INC_DIRS ?= $(INC) $(shell find $(SRC) -type d) 
+INC_FLAGS ?= $(addprefix -I,$(INC_DIRS))
+
+# Construct build output and dependency filenames
+SRCS ?= $(shell find $(SRC) -name *.cpp)
+OBJS ?= $(subst $(SRC)/,$(BUILD)/,$(addsuffix .o,$(basename $(SRCS))))
+DEPS ?= $(OBJS:.o=.d)
+
+CROSS_COMPILE:=
+CXX ?= $(CROSS_COMPILE)g++
+
+# Run task
+run: build
+	@echo "🚀 Executing..."
+	./$(TARGET) $(ARGS)
+
+# Build task
+build: clean all
+
+# Main task
 all: $(TARGET)
 
-$(TARGET) : $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) $(OBJS) -o $(TARGET) $(LDFLAGS)
+# Task producing target from built files
+$(TARGET): $(OBJS)
+	@echo "🚧 Building..."
+	mkdir -p $(dir $@)
+	$(CXX) $(OBJS) -o $@ $(LDPATHS) $(LDFLAGS)
 
+# Compile all cpp files
+$(BUILD)/%.o: $(SRC)/%.cpp
+	mkdir -p $(dir $@)
+	$(CXX) $(CXX_FLAGS) $(PRE_FLAGS) $(INC_FLAGS) -c -o $@ $< $(LDPATHS) $(LDFLAGS)
+
+# Clean task
+.PHONY: clean
 clean:
-	-rm -f *.o $(TARGET) *.elf *.map
+	@echo "🧹 Clearing..."
+	rm -rf build
+
+# Include all dependencies
+-include $(DEPS)

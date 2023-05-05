@@ -138,7 +138,7 @@ enum action_socket get_action(char *buff, struct aesd_seekto *seek_to)
 
 void* threadfunc(void* thread_param)
 {
-    printf("thread started\n");
+    printf("thread func started\n");
 
     struct Node *node = (struct Node *)thread_param;
     FILE *fp = NULL;
@@ -222,7 +222,7 @@ void* threadfunc(void* thread_param)
                 {
                     fp = fopen(FILE_NAME, "r");
                 }
-                printf("send to client\n");
+                printf("send msg to client\n");
                 size_t len = 0;
                 ssize_t read;
                 char *buff_ptr=NULL;
