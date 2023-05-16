@@ -21,6 +21,10 @@
 
 //#define USE_AESD_CHAR_DEVICE
 
+#include "socketManager/SocketManager.h"
+
+using rpi::socket_manager::SocketManager;
+
 bool server_running = false;
 #ifdef USE_AESD_CHAR_DEVICE
 static const char* FILE_NAME = "/dev/aesdchar";
@@ -327,6 +331,16 @@ void handler(int sig, siginfo_t *info, void *context)
     }
 }
 
+#define NEW_IMPL
+
+#ifdef NEW_IMPL
+int main(int argc, char *argv[])
+{
+    SocketManager mgr("9000");
+    mgr.start();
+}
+#else
+
 int main(int argc, char *argv[])
 {
     int listenfd = 0, connfd = 0, s = 0;
@@ -477,3 +491,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+#endif

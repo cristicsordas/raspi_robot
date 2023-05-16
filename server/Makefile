@@ -1,5 +1,5 @@
 #Pre-compiler and Compiler flags
-CXX_FLAGS ?= -Wall -Wextra -std=c++17 -ggdb
+CXX_FLAGS ?= -Wall -Wextra -std=c++17 -g -ggdb
 PRE_FLAGS ?= -MMD -MP
 
 # Project directory structure
