@@ -23,37 +23,35 @@ SocketClientThread::SocketClientThread(int client)
 void SocketClientThread::run()
 {
     std::cout << "thread started buff" << std::endl;
-    FILE *fp = NULL;
 
     while(isRunning())
     {
-        int position = 0;
+        int total_length = 0;
 
         char tmp[RECV_BUFF_SIZE];
         int length = recv(client_, &tmp, RECV_BUFF_SIZE, 0);
         if (length != 0)
         {
-            memcpy(buffPacket_+position, &tmp, length);
-            position += length;
+            memcpy(buffPacket_+total_length, &tmp, length);
+            total_length += length;
             if(tmp[length - 1] == '\n')
             {
-                std::cout << "data received" << std::endl;
-                printf("length %d\n", position);
+                std::cout << "data received. length: " << total_length << std::endl;
                 
-                std::unique_ptr<rpi::executors::Executor> executor = MessageGenerator::createMessageExecutor(buffPacket_, position);
+                std::unique_ptr<rpi::executors::Executor> executor = MessageGenerator::createMessageExecutor(buffPacket_, total_length);
                 if(executor.get() != nullptr)
                 {
                     executor->run();
                 }
-                position = 0;
+                total_length = 0;
             }
         }
         else
         {
-            printf("client closed\n");
+            std::cout << "client closed" << std::endl;
             stop();
         }
     }
 
-    printf("thread %d stopped\n", client_);
+    std::cout << "thread: " << client_ <<  "stopped" << std::endl;
 }

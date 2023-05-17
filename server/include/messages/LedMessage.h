@@ -20,12 +20,12 @@ public:
     : Message(raw_pdu)
     {}
 
-    bool isOn() const
+    bool on() const
     {
         return (pdu_[0] == 1);
     }
 
-    bool isOff() const
+    bool off() const
     {
         return (pdu_[0] == 0);
     }

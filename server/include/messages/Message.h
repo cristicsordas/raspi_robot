@@ -40,6 +40,7 @@ public:
     Message& operator=(const Message<ID, PDU_LENGTH> &other)
     {
         pdu_ = other.pdu_;
+        return *this;
     }
     
     MessageID getID() const

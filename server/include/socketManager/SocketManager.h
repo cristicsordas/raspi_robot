@@ -29,7 +29,7 @@ private:
     static void sigActionHandler(int sig, siginfo_t *info, void *context);
 
 private:
-    static constexpr char* DEFAULT_PORT = "9000";
+    static constexpr char const* DEFAULT_PORT{"9000"};
 
     std::string port_ = DEFAULT_PORT;
     bool daemon_ = false;

@@ -104,6 +104,9 @@ bool SocketManager::startDaemon()
 
 void SocketManager::sigActionHandler(int sig, siginfo_t *info, void *context)
 {
+    (void)info;
+    (void)context;
+
     if((sig == SIGINT) || (sig == SIGTERM))
     {
         SocketMgrData::getInstance().setRunning(false);
@@ -113,13 +116,13 @@ void SocketManager::sigActionHandler(int sig, siginfo_t *info, void *context)
 
 void SocketManager::setSigActions()
 {
-    struct sigaction act_int = { 0 };
+    struct sigaction act_int{};
     act_int.sa_sigaction = &SocketManager::sigActionHandler;
     if (sigaction(SIGINT, &act_int, NULL) == -1) 
     {
         std::cout << "set sigint error" << std::endl;
     }
-    struct sigaction act_term = { 0 };
+    struct sigaction act_term{};
     act_term.sa_sigaction = &SocketManager::sigActionHandler;
     if (sigaction(SIGTERM, &act_term, NULL) == -1) 
     {
