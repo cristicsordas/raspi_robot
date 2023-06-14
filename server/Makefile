@@ -29,6 +29,7 @@ DEPS ?= $(OBJS:.o=.d)
 
 CROSS_COMPILE:=
 CXX ?= $(CROSS_COMPILE)g++
+#CXX=aarch64-none-linux-gnu-g++
 
 # Run task
 run: build
