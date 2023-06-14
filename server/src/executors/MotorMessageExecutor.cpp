@@ -15,89 +15,69 @@ void MotorMessageExecutor::setMotorPwm(uint8_t channel, uint16_t duty)
     _pca.set_pwm(channel, 0, duty);
 }
 
+void MotorMessageExecutor::setWheelPwm(uint8_t channel, rpi::messages::MotorMessage::Direction direction, uint16_t duty)
+{
+    std::cout << "set pwm " << "channel " << channel << " direction " << direction << " duty " << duty << std::endl;
+    if(direction == MotorMessage::Backward)
+    {
+        setMotorPwm(channel, 0);
+        setMotorPwm(channel + 1, duty);
+    }
+    else if(direction == MotorMessage::Forward)
+    {
+        setMotorPwm(channel + 1, 0);
+        setMotorPwm(channel, duty);
+    }
+}
+
+void MotorMessageExecutor::stopWheelPwm(uint8_t channel)
+{
+    setMotorPwm(channel, 0x0FFFU);
+    setMotorPwm(channel + 1, 0x0FFFU);
+}
+
 void MotorMessageExecutor::leftUpperWheel(MotorMessage::Direction direction, uint16_t duty)
 {
     if(duty == 0)
     {
-        setMotorPwm(0, 0x0FFFU);
-        setMotorPwm(1, 0x0FFFU);
+        stopWheelPwm(CHANNEL_LEFT_UPPER);
         return;
     }
-
-    if(direction == MotorMessage::Backward)
-    {
-        std::cout << "left upper forward" << std::endl;
-        setMotorPwm(0, 0);
-        setMotorPwm(1, duty);
-    }
-    else if(direction == MotorMessage::Forward)
-    {
-        std::cout << "left upper backward" << std::endl;
-        setMotorPwm(1, 0);
-        setMotorPwm(0, duty);
-    }
+    setWheelPwm(CHANNEL_LEFT_UPPER, direction, duty);
 }
 
 void MotorMessageExecutor::leftLowerWheel(MotorMessage::Direction direction, uint16_t duty)
 {
     if(duty == 0)
     {
-        setMotorPwm(2, 0x0FFFU);
-        setMotorPwm(3, 0x0FFFU);
+        stopWheelPwm(CHANNEL_LEFT_LOWER);
         return;
     }
 
-    if(direction == MotorMessage::Backward)
-    {
-        setMotorPwm(3, 0);
-        setMotorPwm(2, duty);
-    }
-    else if(direction == MotorMessage::Forward)
-    {
-        setMotorPwm(2, 0);
-        setMotorPwm(3, duty);
-    }
+    direction = (direction == MotorMessage::Backward) ? MotorMessage::Forward : MotorMessage::Backward;
+
+    setWheelPwm(CHANNEL_LEFT_LOWER, direction, duty);
 }
 
 void MotorMessageExecutor::rightUpperWheel(MotorMessage::Direction direction, uint16_t duty)
 {
     if(duty == 0)
     {
-        setMotorPwm(6, 0x0FFFU);
-        setMotorPwm(7, 0x0FFFU);
+        stopWheelPwm(CHANNEL_RIGHT_UPPER);
         return;
     }
 
-    if(direction == MotorMessage::Backward)
-    {
-        setMotorPwm(6, 0);
-        setMotorPwm(7, duty);
-    }
-    else if(direction == MotorMessage::Forward)
-    {
-        setMotorPwm(7, 0);
-        setMotorPwm(6, abs(duty));
-    }
+    setWheelPwm(CHANNEL_RIGHT_UPPER, direction, duty);
 }
 
 void MotorMessageExecutor::rightLowerWheel(MotorMessage::Direction direction, uint16_t duty)
 {
     if(duty == 0)
     {
-        setMotorPwm(4, 0x0FFFU);
-        setMotorPwm(5, 0x0FFFU);
+        stopWheelPwm(CHANNEL_RIGHT_LOWER);
     }
 
-    if(direction == MotorMessage::Backward)
-    {
-        setMotorPwm(4, 0);
-        setMotorPwm(5, duty);
-    }
-    else if(direction == MotorMessage::Forward)
-    {
-        setMotorPwm(5, 0);
-        setMotorPwm(4, duty);
-    }
+    setWheelPwm(CHANNEL_RIGHT_LOWER, direction, duty);
 }
 
 void MotorMessageExecutor::moveCar(MotorMessage::Direction directionLeftUpper, uint16_t duty1, MotorMessage::Direction directionLeftLower, uint16_t duty2, 
@@ -164,7 +144,7 @@ void MotorMessageExecutor::run()
     }
     catch(const std::runtime_error& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << e.what() << std::endl;
     }
    
 }

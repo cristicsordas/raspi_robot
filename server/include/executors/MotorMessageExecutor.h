@@ -30,8 +30,15 @@ private:
                  rpi::messages::MotorMessage::Direction directionrightUpper, uint16_t duty3, 
                  rpi::messages::MotorMessage::Direction directionrightLower, uint16_t duty4);
 
+    void setWheelPwm(uint8_t channel, rpi::messages::MotorMessage::Direction direction, uint16_t duty);
+    void stopWheelPwm(uint8_t channel);
+
 private:
     static constexpr double PCA_PWM_FREQ_HZ = 50.0;
+    static constexpr uint8_t CHANNEL_LEFT_UPPER = 0U;
+    static constexpr uint8_t CHANNEL_LEFT_LOWER = 2U;
+    static constexpr uint8_t CHANNEL_RIGHT_LOWER = 4U;
+    static constexpr uint8_t CHANNEL_RIGHT_UPPER = 6U;
 
     rpi::messages::MotorMessage motor_message_;
     rpi::PiPCA9685::PCA9685 _pca{};

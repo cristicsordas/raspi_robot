@@ -2,15 +2,11 @@
 #include <sstream>
 #include "messages/MessageGenerator.h"
 #include "messages/MessageIds.h"
-#include "messages/LedMessage.h"
 #include "messages/MotorMessage.h"
-#include "executors/LedMessageExecutor.h"
 #include "executors/MotorMessageExecutor.h"
 
 using rpi::messages::MessageGenerator;
 using rpi::messages::MessageID;
-using rpi::messages::LedMessage;
-using rpi::executors::LedMessageExecutor;
 using rpi::executors::MotorMessageExecutor;
 
 std::vector<uint32_t> MessageGenerator::splitRawMsg(uint8_t raw_msg[], uint8_t length)
@@ -42,11 +38,6 @@ std::unique_ptr<rpi::executors::Executor> MessageGenerator::createMessageExecuto
         MessageID msg_id = static_cast<MessageID>(results[0]);
         switch (msg_id)
         {
-            case MessageID::LED_MESSAGE_ID:
-            {
-                LedMessage led_msg(results);
-                executor = std::make_unique<LedMessageExecutor>(led_msg);
-            } break;
             case MessageID::MOTOR_MESSAGE:
             {
                 MotorMessage motor_msg(results);
