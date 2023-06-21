@@ -27,7 +27,7 @@ __s32 i2c_smbus_access(int file, char read_write, __u8 command,
   return err;
 }
 
-using rpi::PiPCA9685::I2CPeripheral;
+using rpi::PiPCA9685US::I2CPeripheral;
 
 I2CPeripheral::I2CPeripheral(const std::string &device, const uint8_t address)
 {

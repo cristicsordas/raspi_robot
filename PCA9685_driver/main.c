@@ -14,46 +14,38 @@ struct pca_dev {
 	char name[8];
 };
 
+struct i2c_pca_data {
+	__u8 command;
+	__u8 data;
+};
+
 /* User is reading data from /dev/pcaXX */
 static ssize_t pca_read_file(struct file *file, char __user *userbuf,
                                size_t count, loff_t *ppos)
 {
-	int expval, size;
+	uint32_t expval, size;
 	char buf[3];
 	struct pca_dev * pca;
+	uint8_t MODE1 = 0x00;
 
 	pca = container_of(file->private_data,
 			     struct pca_dev, 
 			     pca_miscdevice);
 
-	expval = i2c_smbus_read_byte(pca->client);
+	expval = i2c_smbus_read_byte_data(pca->client, MODE1);
 	if (expval < 0)
 		return -EFAULT;
 
-	/* 
-     * converts expval in 2 characters (2bytes) + null value (1byte)
-	 * The values converted are char values (FF) that match with the hex
-	 * int(s32) value of the expval variable.
-	 * if we want to get the int value again, we have to
-	 * do Kstrtoul(). We convert 1 byte int value to
-	 * 2 bytes char values. For instance 255 (1 int byte) = FF (2 char bytes).
-	 */
 	size = sprintf(buf, "%02x", expval);
-
-	/* 
-         * replace NULL by \n. It is not needed to have the char array
-	 * ended with \0 character.
-	 */
-	buf[size] = '\n';
 
 	/* send size+1 to include the \n character */
 	if(*ppos == 0){
-		if(copy_to_user(userbuf, buf, size+1)){
+		if(copy_to_user(userbuf, buf, size)){
 			pr_info("Failed to return led_value to user space\n");
 			return -EFAULT;
 		}
 		*ppos+=1;
-		return size+1;
+		return size;
 	}
 
 	return 0;
@@ -64,8 +56,7 @@ static ssize_t pca_write_file(struct file *file, const char __user *userbuf,
                                    size_t count, loff_t *ppos)
 {
 	int ret;
-	unsigned long val;
-	char buf[4];
+	struct i2c_pca_data pca_data = {.command=0, .data = 0};
 	struct pca_dev * pca;
 
 	pca = container_of(file->private_data,
@@ -78,21 +69,14 @@ static ssize_t pca_write_file(struct file *file, const char __user *userbuf,
 	dev_info(&pca->client->dev,
 		 "we have written %zu characters\n", count); 
 
-	if(copy_from_user(buf, userbuf, count)) {
+	if(copy_from_user((void*)&pca_data, userbuf, count)) {
 		dev_err(&pca->client->dev, "Bad copied value\n");
 		return -EFAULT;
 	}
 
-	buf[count-1] = '\0';
+	dev_info(&pca->client->dev, "the value is %u\n", pca_data.data);
 
-	/* convert the string to an unsigned long */
-	ret = kstrtoul(buf, 0, &val);
-	if (ret)
-		return -EINVAL;
-
-	dev_info(&pca->client->dev, "the value is %lu\n", val);
-
-	ret = i2c_smbus_write_byte(pca->client, val);
+	ret = i2c_smbus_write_byte_data(pca->client, pca_data.command, pca_data.data);
 	if (ret < 0)
 		dev_err(&pca->client->dev, "the device is not found\n");
 

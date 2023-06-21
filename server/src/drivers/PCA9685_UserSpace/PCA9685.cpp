@@ -2,13 +2,12 @@
 #include <unistd.h>
 #include <cmath>
 #include "drivers/PCA9685_UserSpace/Constants.h"
-#include "drivers/PCA9685_UserSpace/I2CPeripheral.h"
 
 using rpi::PiPCA9685::PCA9685;
 using namespace rpi::PiPCA9685;
 
-PCA9685::PCA9685(const std::string &device, int address)
-    : _i2c_dev(device, address)
+PCA9685::PCA9685(const PiPCA9685KS::I2CPeripheral &i2c_dev)
+:_i2c_dev(i2c_dev)
 {
   set_all_pwm(0, 0);
   _i2c_dev.WriteRegisterByte(MODE2, OUTDRV);

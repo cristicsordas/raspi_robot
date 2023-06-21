@@ -1,5 +1,5 @@
-#ifndef PIPCA9685_I2CPERIPHERAL_H
-#define PIPCA9685_I2CPERIPHERAL_H
+#ifndef PIPCA9685_I2CPERIPHERAL_KS_H
+#define PIPCA9685_I2CPERIPHERAL_KS_H
 
 #include <cstdint>
 #include <string>
@@ -8,26 +8,25 @@
 
 namespace rpi
 {
-namespace PiPCA9685US
+namespace PiPCA9685KS
 {
 
-class I2CPeripheral 
+class I2CPeripheral
 {
 public:
-  I2CPeripheral(const std::string &device = "/dev/i2c-1", uint8_t address = 0x40);
+  I2CPeripheral(const std::string &device = "/dev/PCA9685");
   ~I2CPeripheral();
 
   void WriteRegisterByte(const uint8_t register_address, const uint8_t value);
   uint8_t ReadRegisterByte(const uint8_t register_address);
 
 private:
-  int _bus_fd;
+  FILE *fp=nullptr;
 
   void OpenBus(const std::string& device);
-  void ConnectToPeripheral(const uint8_t address);
 };
 
-}  // namespace PiPCA9685US
+}  // namespace PiPCA9685KS
 }  // namespace rpi
 
-#endif  // PIPCA9685_I2CPERIPHERAL_H
+#endif  // PIPCA9685_I2CPERIPHERAL_KS_H
