@@ -5,6 +5,7 @@
 #include <linux/fs.h>
 #include <linux/of.h>
 #include <linux/uaccess.h>
+#include "PCA9695.h"
 
 int pca_minor =   0;
 
@@ -63,25 +64,22 @@ static ssize_t pca_write_file(struct file *file, const char __user *userbuf,
 			     struct pca_dev, 
 			     pca_miscdevice);
 
-	dev_info(&pca->client->dev, 
-		 "pca_write_file entered on %s\n", pca->name);
+	PDEBUG("pca_write_file entered on %s\n", pca->name);
 
-	dev_info(&pca->client->dev,
-		 "we have written %zu characters\n", count); 
+	PDEBUG("we have written %zu characters\n", count); 
 
 	if(copy_from_user((void*)&pca_data, userbuf, count)) {
-		dev_err(&pca->client->dev, "Bad copied value\n");
+		PDEBUG("Bad copied value\n");
 		return -EFAULT;
 	}
 
-	dev_info(&pca->client->dev, "the value is %u\n", pca_data.data);
+	PDEBUG("the value is %u\n", pca_data.data);
 
 	ret = i2c_smbus_write_byte_data(pca->client, pca_data.command, pca_data.data);
 	if (ret < 0)
-		dev_err(&pca->client->dev, "the device is not found\n");
+		PDEBUG("the device is not found\n");
 
-	dev_info(&pca->client->dev, 
-		 "pca_write_file exited on %s\n", pca->name);
+	PDEBUG("pca_write_file exited on %s\n", pca->name);
 
 	return count;
 }
@@ -108,8 +106,7 @@ static int pca_probe(struct i2c_client * client,
 
 	/* Initialize the misc device */
 	sprintf(pca->name, "pca9685"); 
-	dev_info(&client->dev, 
-		 "pca_probe is entered on %s\n", pca->name);
+	PDEBUG("pca_probe is entered on %s\n", pca->name);
 
 	pca->pca_miscdevice.name = pca->name;
 	pca->pca_miscdevice.minor = pca_minor;
@@ -118,8 +115,7 @@ static int pca_probe(struct i2c_client * client,
 	/* Register misc device */
 	return misc_register(&pca->pca_miscdevice);
 
-	dev_info(&client->dev, 
-		 "pca_probe is exited on %s\n", pca->name);
+	PDEBUG("pca_probe is exited on %s\n", pca->name);
 
 	return 0;
 }
@@ -131,14 +127,12 @@ static int pca_remove(struct i2c_client * client)
 	/* Get device structure from bus device context */	
 	pca = i2c_get_clientdata(client);
 
-	dev_info(&client->dev, 
-		 "pca_remove is entered on %s\n", pca->name);
+	PDEBUG("pca_remove is entered on %s\n", pca->name);
 
 	/* Deregister misc device */
 	misc_deregister(&pca->pca_miscdevice);
 
-	dev_info(&client->dev, 
-		 "pca_remove is exited on %s\n", pca->name);
+	PDEBUG("pca_remove is exited on %s\n", pca->name);
 
 	return 0;
 }
