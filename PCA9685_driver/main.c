@@ -16,8 +16,8 @@ struct pca_dev {
 };
 
 struct i2c_pca_data {
-	__u8 command;
-	__u8 data;
+	char command;
+	char data;
 };
 
 /* User is reading data from /dev/pcaXX */
@@ -57,8 +57,8 @@ static ssize_t pca_write_file(struct file *file, const char __user *userbuf,
                                    size_t count, loff_t *ppos)
 {
 	int ret;
-	struct i2c_pca_data pca_data = {.command=0, .data = 0};
 	struct pca_dev * pca;
+	char buf[4];
 
 	pca = container_of(file->private_data,
 			     struct pca_dev, 
@@ -68,14 +68,15 @@ static ssize_t pca_write_file(struct file *file, const char __user *userbuf,
 
 	PDEBUG("we have written %zu characters\n", count); 
 
-	if(copy_from_user((void*)&pca_data, userbuf, count)) {
+	if(copy_from_user(buf, userbuf, count)) {
 		PDEBUG("Bad copied value\n");
 		return -EFAULT;
 	}
 
-	PDEBUG("the value is %u\n", pca_data.data);
+	PDEBUG("the command is %d\n", buf[0]);
+	PDEBUG("the value is %d\n", buf[1]);
 
-	ret = i2c_smbus_write_byte_data(pca->client, pca_data.command, pca_data.data);
+	ret = i2c_smbus_write_byte_data(pca->client, buf[0], buf[1]);
 	if (ret < 0)
 		PDEBUG("the device is not found\n");
 

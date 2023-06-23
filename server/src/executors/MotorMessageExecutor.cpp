@@ -142,9 +142,17 @@ void MotorMessageExecutor::run()
             } break;
         }
     }
+    catch(const std::system_error& e)
+    {
+        std::cout << "System Error " << e.what() << std::endl;
+    }
     catch(const std::runtime_error& e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cout << "Runtime Error " << e.what() << std::endl;
+    }
+    catch(...)
+    {
+        std::cout << "Error " << std::endl;
     }
    
 }

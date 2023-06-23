@@ -14,14 +14,14 @@ namespace PiPCA9685KS
 class I2CPeripheral
 {
 public:
-  I2CPeripheral(const std::string &device = "/dev/PCA9685");
+  I2CPeripheral(const std::string &device = "/dev/pca9685");
   ~I2CPeripheral();
 
   void WriteRegisterByte(const uint8_t register_address, const uint8_t value);
   uint8_t ReadRegisterByte(const uint8_t register_address);
 
 private:
-  FILE *fp=nullptr;
+  FILE *fp =NULL;
 
   void OpenBus(const std::string& device);
 };
