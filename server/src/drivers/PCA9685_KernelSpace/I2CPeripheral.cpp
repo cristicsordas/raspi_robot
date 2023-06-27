@@ -36,18 +36,13 @@ void I2CPeripheral::WriteRegisterByte(const uint8_t register_address, const uint
 
 uint8_t I2CPeripheral::ReadRegisterByte(const uint8_t register_address)
 {
-  uint8_t buf[2];
+  uint8_t buf[4];
   memset(buf, 0, sizeof(buf));
   std::cout << "read reg addr " << (int)register_address << std::endl;
   size_t bytes_read = fread(buf, 1, sizeof(buf), fp);
   fflush(fp);
-  std::cout << "reg read " <<  (int)bytes_read << std::endl;
-  // if (bytes_read == 0)
-  // {
-  //   const auto msg = "Could not read value at register " + std::to_string(register_address);
-  //   throw std::system_error(errno, std::system_category(), msg);
-  // }
-  return buf[1] & 0xFF;
+  std::cout << "reg read nr bytes " <<  (int)bytes_read << " value " <<  (int)buf[0] << std::endl;
+  return buf[0] & 0xFF;
 }
 
 void I2CPeripheral::OpenBus(const std::string &device)

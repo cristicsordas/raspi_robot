@@ -25,7 +25,7 @@ static ssize_t pca_read_file(struct file *file, char __user *userbuf,
                                size_t count, loff_t *ppos)
 {
 	uint32_t expval, size;
-	char buf[3];
+	char buf[4];
 	struct pca_dev * pca;
 	uint8_t MODE1 = 0x00;
 
@@ -36,20 +36,20 @@ static ssize_t pca_read_file(struct file *file, char __user *userbuf,
 	expval = i2c_smbus_read_byte_data(pca->client, MODE1);
 	if (expval < 0)
 		return -EFAULT;
+	
+	buf[0] = expval & 0xFF;
+	buf[1] = (expval >> 8) & 0xFF;
+	buf[2] = (expval >> 16) & 0xFF;
+	buf[3] = (expval >> 24) & 0xFF;
+	size = sizeof(buf);
 
-	size = sprintf(buf, "%02x", expval);
-
-	/* send size+1 to include the \n character */
-	if(*ppos == 0){
-		if(copy_to_user(userbuf, buf, size)){
-			pr_info("Failed to return led_value to user space\n");
-			return -EFAULT;
-		}
-		*ppos+=1;
-		return size;
+	if(copy_to_user(userbuf, buf, size)){
+		pr_info("Failed to return i2c read value to user space\n");
+		return -EFAULT;
 	}
+	*ppos = 0;
 
-	return 0;
+	return size;
 }
 
 /* Writing from the terminal command line, \n is added */
