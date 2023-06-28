@@ -3,7 +3,7 @@
 
 #include "executors/Executor.h"
 #include "messages/MotorMessage.h"
-#include "drivers/PCA9685_UserSpace/PCA9685.h"
+#include "drivers/PCA9685/PCA9685.h"
 #include <memory>
 
 namespace rpi
@@ -41,8 +41,7 @@ private:
     static constexpr uint8_t CHANNEL_RIGHT_UPPER = 6U;
 
     rpi::messages::MotorMessage motor_message_;
-    rpi::PiPCA9685KS::I2CPeripheral _i2c_dev{};
-    rpi::PiPCA9685::PCA9685 _pca{_i2c_dev};
+    rpi::PiPCA9685::PCA9685 _pca;
 };
 
 }

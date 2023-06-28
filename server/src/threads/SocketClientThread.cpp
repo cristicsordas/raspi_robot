@@ -8,7 +8,6 @@
 #include "messages/MessageGenerator.h"
 #include "socketManager/SocketMgrData.h"
 #include "threads/SocketClientThread.h"
-#include "aesd_ioctl.h"
 
 using rpi::threads::SocketClientThread;
 using rpi::socket_manager::SocketMgrData;

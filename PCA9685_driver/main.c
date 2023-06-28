@@ -6,6 +6,8 @@
 #include <linux/of.h>
 #include <linux/uaccess.h>
 #include "PCA9695.h"
+#include "pca_ioctl.h"
+#include "constants.h"
 
 int pca_minor =   0;
 
@@ -52,7 +54,6 @@ static ssize_t pca_read_file(struct file *file, char __user *userbuf,
 	return size;
 }
 
-/* Writing from the terminal command line, \n is added */
 static ssize_t pca_write_file(struct file *file, const char __user *userbuf,
                                    size_t count, loff_t *ppos)
 {
@@ -85,10 +86,138 @@ static ssize_t pca_write_file(struct file *file, const char __user *userbuf,
 	return count;
 }
 
+long set_all_pwm(struct file *file, const uint16_t on_value, const uint16_t off_value)
+{
+	int ret;
+	struct pca_dev * pca;
+
+	pca = container_of(file->private_data,
+			     struct pca_dev, 
+			     pca_miscdevice);
+
+	ret = i2c_smbus_write_byte_data(pca->client, ALL_LED_ON_L, on_value & 0xFF);
+	if (ret < 0)
+	{
+		PDEBUG("device not found\n");
+		return -ENOTTY;
+	}
+
+	ret = i2c_smbus_write_byte_data(pca->client, ALL_LED_ON_H, on_value >> 8);
+	if (ret < 0)
+	{
+		PDEBUG("device not found\n");
+		return -ENOTTY;
+	}
+
+	ret = i2c_smbus_write_byte_data(pca->client, ALL_LED_OFF_L, off_value & 0xFF);
+	if (ret < 0)
+	{
+		PDEBUG("device not found\n");
+		return -ENOTTY;
+	}
+
+	ret = i2c_smbus_write_byte_data(pca->client, ALL_LED_OFF_H, off_value >> 8);
+	if (ret < 0)
+	{
+		PDEBUG("device not found\n");
+		return -ENOTTY;
+	}
+
+	return 0;
+}
+
+long set_pwm(struct file *file, const uint8_t channel, uint16_t on_value, const uint16_t off_value)
+{
+	const uint8_t channel_offset = 4 * channel;
+		int ret;
+	struct pca_dev * pca;
+
+	pca = container_of(file->private_data,
+			     struct pca_dev, 
+			     pca_miscdevice);
+
+	ret = i2c_smbus_write_byte_data(pca->client, LED0_ON_L + channel_offset, on_value & 0xFF);
+	if (ret < 0)
+	{
+		PDEBUG("device not found\n");
+		return -ENOTTY;
+	}
+
+	ret = i2c_smbus_write_byte_data(pca->client, LED0_ON_H + channel_offset, on_value >> 8);
+	if (ret < 0)
+	{
+		PDEBUG("device not found\n");
+		return -ENOTTY;
+	}
+
+	ret = i2c_smbus_write_byte_data(pca->client, LED0_OFF_L + channel_offset, off_value & 0xFF);
+	if (ret < 0)
+	{
+		PDEBUG("device not found\n");
+		return -ENOTTY;
+	}
+
+	ret = i2c_smbus_write_byte_data(pca->client, LED0_OFF_H + channel_offset, off_value >> 8);
+	if (ret < 0)
+	{
+		PDEBUG("device not found\n");
+		return -ENOTTY;
+	}
+
+	return 0;
+}
+
+long pca_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+{
+    long retval = 0;
+	struct pca_pwm pwm_val;
+	struct pca_channel_pwm pwm_channel_val;
+
+	switch (cmd)
+	{
+	case PCA_IOC_SET_ALL_PWM:
+		PDEBUG("ioctl set all pwm\n");
+		if(copy_from_user(&pwm_val, (const void __user *)arg, sizeof(pwm_val)) != 0)
+        {
+			PDEBUG("copy from user error\n");
+            retval = -EFAULT;
+        }
+        else
+        {
+			PDEBUG("set_all_pwm\n");
+            retval = set_all_pwm(filp, pwm_val.on_value, pwm_val.off_value);
+			PDEBUG("set_all_pwm retval %zu\n", retval);
+        }
+		break;
+	case PCA_IOC_SET_PWM_FREQV:
+		break;
+	case PCA_IOC_SET_PWM_ON_CHANNEL:
+		PDEBUG("ioctl set pwm\n");
+		if(copy_from_user(&pwm_channel_val, (const void __user *)arg, sizeof(pwm_channel_val)) != 0)
+        {
+			PDEBUG("copy from user error\n");
+            retval = -EFAULT;
+        }
+        else
+        {
+			PDEBUG("set_pwm\n");
+            retval = set_pwm(filp, pwm_channel_val.channel, pwm_channel_val.on_value, pwm_channel_val.off_value);
+			PDEBUG("set_pwm retval %zu\n", retval);
+        }
+		break;
+		break;
+	default:
+		break;
+	}
+	return retval;
+}
+
 static const struct file_operations pca_fops = {
 	.owner = THIS_MODULE,
 	.read = pca_read_file,
 	.write = pca_write_file,
+	.compat_ioctl = pca_ioctl,
+	.unlocked_ioctl = pca_ioctl
 };
 
 static int pca_probe(struct i2c_client * client,
