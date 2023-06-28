@@ -37,22 +37,17 @@ void PCA9685::set_pwm_freq(const double freq_hz)
   prescaleval /= freq_hz;
   prescaleval -= 1.0;
 
-  auto prescale = static_cast<int>(std::round(prescaleval));
+  uint32_t prescale = static_cast<uint32_t>(std::round(prescaleval));
 
-  const auto oldmode = read_register_byte(MODE1);
-
-  auto newmode = (oldmode & 0x7F) | SLEEP;
-
-  write_register_bByte(MODE1, newmode);
-  write_register_bByte(PRESCALE, prescale);
-  write_register_bByte(MODE1, oldmode);
-  usleep(5'000);
-  write_register_bByte(MODE1, oldmode | RESTART);
+  if (ioctl(fileno(fp_), PCA_IOC_SET_PWM_FREQV, &prescale))
+  {
+    std::cout << "PCA_IOC_SET_PWM_FREQV error" << std::endl;
+  }
 }
 
 void PCA9685::set_pwm(const uint8_t channel, const uint16_t on, const uint16_t off)
 {
-   struct pca_channel_pwm pwm_channel_value {.channel = channel, .on_value = on, .off_value=off};
+  struct pca_channel_pwm pwm_channel_value {.channel = channel, .on_value = on, .off_value=off};
 
   if (ioctl(fileno(fp_), PCA_IOC_SET_PWM_ON_CHANNEL, &pwm_channel_value))
   {

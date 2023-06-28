@@ -99,28 +99,28 @@ long set_all_pwm(struct file *file, const uint16_t on_value, const uint16_t off_
 	if (ret < 0)
 	{
 		PDEBUG("device not found\n");
-		return -ENOTTY;
+		return -EFAULT;
 	}
 
 	ret = i2c_smbus_write_byte_data(pca->client, ALL_LED_ON_H, on_value >> 8);
 	if (ret < 0)
 	{
 		PDEBUG("device not found\n");
-		return -ENOTTY;
+		return -EFAULT;
 	}
 
 	ret = i2c_smbus_write_byte_data(pca->client, ALL_LED_OFF_L, off_value & 0xFF);
 	if (ret < 0)
 	{
 		PDEBUG("device not found\n");
-		return -ENOTTY;
+		return -EFAULT;
 	}
 
 	ret = i2c_smbus_write_byte_data(pca->client, ALL_LED_OFF_H, off_value >> 8);
 	if (ret < 0)
 	{
 		PDEBUG("device not found\n");
-		return -ENOTTY;
+		return -EFAULT;
 	}
 
 	return 0;
@@ -129,7 +129,7 @@ long set_all_pwm(struct file *file, const uint16_t on_value, const uint16_t off_
 long set_pwm(struct file *file, const uint8_t channel, uint16_t on_value, const uint16_t off_value)
 {
 	const uint8_t channel_offset = 4 * channel;
-		int ret;
+	int ret;
 	struct pca_dev * pca;
 
 	pca = container_of(file->private_data,
@@ -140,28 +140,76 @@ long set_pwm(struct file *file, const uint8_t channel, uint16_t on_value, const 
 	if (ret < 0)
 	{
 		PDEBUG("device not found\n");
-		return -ENOTTY;
+		return -EFAULT;
 	}
 
 	ret = i2c_smbus_write_byte_data(pca->client, LED0_ON_H + channel_offset, on_value >> 8);
 	if (ret < 0)
 	{
 		PDEBUG("device not found\n");
-		return -ENOTTY;
+		return -EFAULT;
 	}
 
 	ret = i2c_smbus_write_byte_data(pca->client, LED0_OFF_L + channel_offset, off_value & 0xFF);
 	if (ret < 0)
 	{
 		PDEBUG("device not found\n");
-		return -ENOTTY;
+		return -EFAULT;
 	}
 
 	ret = i2c_smbus_write_byte_data(pca->client, LED0_OFF_H + channel_offset, off_value >> 8);
 	if (ret < 0)
 	{
 		PDEBUG("device not found\n");
-		return -ENOTTY;
+		return -EFAULT;
+	}
+
+	return 0;
+}
+
+long set_freqv(struct file *file, uint32_t freqv)
+{
+	struct pca_dev * pca;
+	uint32_t oldmode = 0;
+	uint32_t newmode = 0;
+	int ret;
+
+	pca = container_of(file->private_data,
+				struct pca_dev, 
+				pca_miscdevice);
+
+	oldmode = i2c_smbus_read_byte_data(pca->client, MODE1);
+	if (oldmode < 0)
+		return -EFAULT;
+
+  	newmode = (oldmode & 0x7F) | SLEEP;
+
+	ret = i2c_smbus_write_byte_data(pca->client, MODE1, newmode);
+	if (ret < 0)
+	{
+		PDEBUG("device not found\n");
+		return -EFAULT;
+	}
+
+	ret = i2c_smbus_write_byte_data(pca->client, PRESCALE, freqv);
+	if (ret < 0)
+	{
+		PDEBUG("device not found\n");
+		return -EFAULT;
+	}
+
+	ret = i2c_smbus_write_byte_data(pca->client, MODE1, oldmode);
+	if (ret < 0)
+	{
+		PDEBUG("device not found\n");
+		return -EFAULT;
+	}
+
+	ret = i2c_smbus_write_byte_data(pca->client, MODE1, oldmode | RESTART);
+	if (ret < 0)
+	{
+		PDEBUG("device not found\n");
+		return -EFAULT;
 	}
 
 	return 0;
@@ -172,6 +220,7 @@ long pca_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
     long retval = 0;
 	struct pca_pwm pwm_val;
 	struct pca_channel_pwm pwm_channel_val;
+	uint32_t freqv = 0;
 
 	switch (cmd)
 	{
@@ -190,6 +239,18 @@ long pca_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
         }
 		break;
 	case PCA_IOC_SET_PWM_FREQV:
+		PDEBUG("ioctl set_freqv\n");
+		if(copy_from_user(&freqv, (const void __user *)arg, sizeof(freqv)) != 0)
+        {
+			PDEBUG("copy from user error\n");
+            retval = -EFAULT;
+        }
+        else
+        {
+			PDEBUG("set_freqv\n");
+            retval = set_freqv(filp, freqv);
+			PDEBUG("set_freqv retval %zu\n", retval);
+        }
 		break;
 	case PCA_IOC_SET_PWM_ON_CHANNEL:
 		PDEBUG("ioctl set pwm\n");
