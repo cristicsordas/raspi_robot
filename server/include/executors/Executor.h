@@ -1,9 +1,8 @@
 #ifndef RPI_EXECUTORS_EXECUTOR_H
 #define RPI_EXECUTORS_EXECUTOR_H
 
-#include "messages/Message.h"
 #include <memory>
-
+#include <vector>
 
 namespace rpi
 {
@@ -16,7 +15,7 @@ class Executor
 public:
     virtual void run() = 0;
     virtual bool has_result() = 0;
-    virtual rpi::messages::MessageRaw get_result() = 0;
+    virtual std::vector<uint8_t> get_result() = 0;
 };
 
 }

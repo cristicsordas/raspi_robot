@@ -11,7 +11,7 @@ namespace messages
 
 static const uint8_t MOTOR_MESSAGE_PDU_LENGTH = 10U;
 
-class MotorMessage : public Message<MessageID::MOTOR_MESSAGE, MOTOR_MESSAGE_PDU_LENGTH>
+class MotorMessage : public Message<MessageID::TX_MOTOR_MESSAGE, MOTOR_MESSAGE_PDU_LENGTH>
 {
 public:
     MotorMessage() = default;

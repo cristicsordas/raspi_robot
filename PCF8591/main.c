@@ -10,7 +10,7 @@
 
 
 int pcf_minor =   0;
-uint8_t current_channel = 0;
+static uint8_t current_channel = 0;
 
 static const uint8_t MAX_LIST_SIZE = 9;
 
@@ -152,6 +152,8 @@ static ssize_t pcf_read_file(struct file *file, char __user *userbuf,
 			     struct pcf_dev, 
 			     pcf_miscdevice);
 
+
+	PDEBUG("read from channel %du\n", current_channel);
 	empty_list();
 	insert_elem = head;
 	while(insert_elem != NULL)
@@ -207,7 +209,7 @@ long pca_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
         else
         {
 			current_channel = channel;
-			PDEBUG("set current channel\n");
+			PDEBUG("set current channel %du \n", current_channel);
         }
 		break;
 	default:

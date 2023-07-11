@@ -21,9 +21,9 @@ public:
     {
         return false;
     }
-    rpi::messages::MessageRaw get_result() override
+    std::vector<uint8_t> get_result() override
     {
-        return rpi::messages::MessageRaw();
+        return std::vector<uint8_t>();
     }
 
 private:

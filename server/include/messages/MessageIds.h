@@ -10,7 +10,9 @@ namespace messages
 
 enum class MessageID
 {
-    MOTOR_MESSAGE = 1
+    TX_MOTOR_MESSAGE = 1,
+    TX_LIGHT_SENSOR = 2,
+    RX_LIGHT_SENSOR = 3
 };
 
 template <typename Enum>

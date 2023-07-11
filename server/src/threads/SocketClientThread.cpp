@@ -41,6 +41,11 @@ void SocketClientThread::run()
                 if(executor.get() != nullptr)
                 {
                     executor->run();
+                    if(executor->has_result())
+                    {
+                        std::vector<uint8_t> rxMsg = executor->get_result();
+                        send(client_, reinterpret_cast<char*>(rxMsg.data()), rxMsg.size(), 0);
+                    }
                 }
                 total_length = 0;
             }

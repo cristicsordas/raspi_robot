@@ -4,25 +4,33 @@
 #include "../../../../PCF8591/pcf_ioctl.h"
 
 
-using rpi::PiPCF8591::PCA9685; 
+using rpi::PiPCF8591::PCF8591; 
 
-PCA9685::PCA9685()
+PCF8591::PCF8591()
 {
     open();
 }
 
-PCA9685::~PCA9685()
+PCF8591::~PCF8591()
 {
-    std::cout << "close device PCA9685" << std::endl;
-    fclose(fp_);
+    std::cout << "close device PCF8591" << std::endl;
+    if(fp_ != NULL)
+    {
+        fclose(fp_);
+        fp_ = NULL;
+    }
 }
 
-double PCA9685::readADC(uint8_t channel)
+double PCF8591::readADC(uint8_t channel)
 {
+    if(fp_ == NULL)
+        return 0.0;
+
     if (ioctl(fileno(fp_), PCF_IOC_SET_CHANNEL, &channel))
     {
         std::cout << "PCF_IOC_SET_CHANNEL error" << std::endl;
     }
+    fflush(fp_);
 
     uint8_t max_retries = 10;
     bool is_value_correct = false;
@@ -49,7 +57,7 @@ double PCA9685::readADC(uint8_t channel)
     return voltage;
 }
 
-uint32_t PCA9685::getValue(uint8_t buf[])
+uint32_t PCF8591::getValue(uint8_t buf[])
 {
     uint32_t result = buf[0];
 	result |= (8 << buf[1]);
@@ -58,13 +66,13 @@ uint32_t PCA9685::getValue(uint8_t buf[])
     return result;
 }
 
-void PCA9685::open()
+void PCF8591::open()
 {
     fp_ = fopen(device_.c_str(), "a+");
     std::cout << "open device " << device_ << std::endl;
     if (fp_ == NULL)
     {
         std::cout << "open device error";
-        throw std::system_error(errno, std::system_category(), "Could not open pca i2c communication");
+        //throw std::system_error(errno, std::system_category(), "Could not open pca i2c communication");
     }
 }
