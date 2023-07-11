@@ -5,7 +5,7 @@
 #include <linux/fs.h>
 #include <linux/of.h>
 #include <linux/uaccess.h>
-#include "PCA9695.h"
+#include "PCA9685.h"
 #include "pca_ioctl.h"
 #include "constants.h"
 

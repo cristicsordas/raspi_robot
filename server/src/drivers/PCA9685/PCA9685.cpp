@@ -24,7 +24,7 @@ PCA9685::PCA9685()
 
 PCA9685::~PCA9685()
 {
-  std::cout << "close device" << std::endl;
+  std::cout << "close device PCA9685" << std::endl;
   fclose(fp_);
 }
 

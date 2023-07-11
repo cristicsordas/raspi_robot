@@ -17,6 +17,14 @@ public:
     MotorMessageExecutor(rpi::messages::MotorMessage& motor_message);
 
     void run() override;
+    bool has_result() override
+    {
+        return false;
+    }
+    rpi::messages::MessageRaw get_result() override
+    {
+        return rpi::messages::MessageRaw();
+    }
 
 private:
     void setMotorPwm(uint8_t channel, uint16_t duty);
