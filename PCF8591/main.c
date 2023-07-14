@@ -9,7 +9,7 @@
 #include "pcf_ioctl.h"
 
 
-int pcf_minor =   0;
+int pcf_minor = 1;
 static uint8_t current_channel = 0;
 
 static const uint8_t MAX_LIST_SIZE = 9;
