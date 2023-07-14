@@ -192,7 +192,7 @@ exit:
 	return result;
 }
 
-long pca_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+long pcf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
     long retval = 0;
 	uint8_t channel = 0;
@@ -222,8 +222,8 @@ long pca_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 static const struct file_operations pcf_fops = {
 	.owner = THIS_MODULE,
 	.read = pcf_read_file,
-	.compat_ioctl = pca_ioctl,
-	.unlocked_ioctl = pca_ioctl
+	.compat_ioctl = pcf_ioctl,
+	.unlocked_ioctl = pcf_ioctl
 };
 
 static int pcf_probe(struct i2c_client * client,
