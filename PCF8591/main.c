@@ -124,7 +124,6 @@ void print_list(void)
 	struct Node *current_elem = head;
 	while(current_elem != NULL)
 	{
-		PDEBUG("list elem %du\n", current_elem->value);
 		current_elem = current_elem->next;
 	}
 }
@@ -147,6 +146,8 @@ static ssize_t pcf_read_file(struct file *file, char __user *userbuf,
 	struct pcf_dev * pcf;
 	struct Node *insert_elem;
 
+	memset(&buf_output[0], 0, sizeof(buf_output));
+
 	PDEBUG("read file\n");
 	pcf = container_of(file->private_data,
 			     struct pcf_dev, 
@@ -159,7 +160,6 @@ static ssize_t pcf_read_file(struct file *file, char __user *userbuf,
 	while(insert_elem != NULL)
 	{
 		expval = i2c_smbus_read_byte_data(pcf->client, COMMAND + current_channel);
-		PDEBUG("i2c read %du\n", expval);
 		if (expval < 0) {
 			result = -EFAULT;
 			goto exit;
@@ -172,6 +172,7 @@ static ssize_t pcf_read_file(struct file *file, char __user *userbuf,
 	print_list();
 
 	middle_value = get_middle_value();
+	PDEBUG("i2c read %du\n", middle_value);
 	buf_output[0] = middle_value & 0xFF;
 	buf_output[1] = (middle_value >> 8) & 0xFF;
 	buf_output[2] = (middle_value >> 16) & 0xFF;
@@ -200,7 +201,7 @@ long pcf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	switch (cmd)
 	{
 	case PCF_IOC_SET_CHANNEL:
-		PDEBUG("ioctl set all pwm\n");
+		PDEBUG("ioctl set channel\n");
 		if(copy_from_user(&channel, (const void __user *)arg, sizeof(channel)) != 0)
         {
 			PDEBUG("copy from user error\n");

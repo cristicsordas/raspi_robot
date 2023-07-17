@@ -21,7 +21,7 @@ PCF8591::~PCF8591()
     }
 }
 
-double PCF8591::readADC(uint8_t channel)
+uint32_t PCF8591::readADC(uint8_t channel)
 {
     if(fp_ == NULL)
         return 0.0;
@@ -47,22 +47,30 @@ double PCF8591::readADC(uint8_t channel)
         if(bytes_read > 0)
         {
             value1 = getValue(buf);
+            std::cout << "value1 " << (int)value1 << std::endl;
+        }
+
+        memset(buf, 0, sizeof(buf));
+        bytes_read = fread(buf, 1, sizeof(buf), fp_);
+        std::cout << "read " << bytes_read << " bytes. data " << buf << std::endl;
+        fflush(fp_);
+        if(bytes_read > 0)
+        {
             value2 = getValue(buf);
-            std::cout << "value1 " << value1 << std::endl;
-            std::cout << "value2 " << value1 << std::endl;
+            std::cout << "value2 " << (int)value2 << std::endl;
             is_value_correct = (value1 == value2);
         }
     }
-    double voltage = (value1 / 256.0);
-    return voltage;
+    return value1;
 }
 
 uint32_t PCF8591::getValue(uint8_t buf[])
 {
-    uint32_t result = buf[0];
-	result |= (8 << buf[1]);
-	result |= (16 << buf[2]);
-	result |= (24 << buf[3]);
+    std::cout << (int)buf[0] << ":" << (int)buf[1] << ":" << (int)buf[2] << ":" << (int)buf[3] << std::endl;
+    uint32_t result = static_cast<uint32_t>(buf[0] & 0xFF);
+	result |= static_cast<uint32_t>((buf[1] & 0xFF) << 8);
+	result |= static_cast<uint32_t>((buf[2] & 0xFF) << 16);
+	result |= static_cast<uint32_t>((buf[3] & 0xFF) << 24);
     return result;
 }
 

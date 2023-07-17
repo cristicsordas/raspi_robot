@@ -16,7 +16,7 @@ public:
     PCF8591();
     ~PCF8591();
 
-    double readADC(uint8_t channel);
+    uint32_t readADC(uint8_t channel);
     bool isOpened() const
     {
         return (fp_ != NULL);

@@ -29,7 +29,7 @@ public:
     }
 
 private:
-    void fill_raw_result(double value);
+    void fill_raw_result(uint32_t value);
 
 private:
     rpi::messages::TxLightSensorMessage tx_light_sensor_message_;
