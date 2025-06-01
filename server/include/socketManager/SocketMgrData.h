@@ -1,5 +1,6 @@
 #include <mutex>
 #include <vector>
+#include <memory>
 #include "threads/IThread.h"
 
 namespace rpi
